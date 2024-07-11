@@ -4,8 +4,10 @@
 #include <ctype.h>
 
 #define MAX_SIZE 100
+#define MAX_USERS 100
 
-struct User {
+struct User
+{
     char username[MAX_SIZE];
     char password[MAX_SIZE];
     char firstname[MAX_SIZE];
@@ -13,8 +15,6 @@ struct User {
     char phone[MAX_SIZE];
     char email[MAX_SIZE];
 };
-
-
 
 int main()
 {
@@ -62,11 +62,6 @@ int main()
     return 0;
 }
 
-
-
-
-
-
 void adminMenu()
 {
     int choice;
@@ -100,7 +95,7 @@ void adminMenu()
             ShowAllWords_Admin();
             break;
         case 6:
-            //manageSuggestedWords();
+            // manageSuggestedWords();
             break;
         case 7:
             printf("Returning to main menu...\n");
@@ -111,10 +106,12 @@ void adminMenu()
     }
 }
 
-void userMenu() {
+void userMenu()
+{
     int choice;
     char s1[MAX_SIZE];
     char s2[MAX_SIZE];
+    struct User *login = NULL;
 
     while (choice != 6 && login != NULL)
     {
@@ -126,6 +123,7 @@ void userMenu() {
         printf("5. Edit Information\n");
         printf("6. Log Out\n");
         printf("Choose an option: ");
+
         scanf("%d", &choice);
         switch (choice)
         {
@@ -155,5 +153,102 @@ void userMenu() {
     }
 }
 
+void signUp() {
+    struct User new_user;
+    struct User users[MAX_USERS];
+    int user_count = 0;
+    printf("Enter First Name: ");
+    scanf("%s", new_user.firstname);
+    if (strlen(new_user.firstname) == 0) {
+        printf("First name cannot be empty.\n");
+        return;
+    }
+    if (isAlphaString(new_user.firstname) == 0) {
+        printf("First name must contain only alphabetic characters.\n");
+        return;
+    }
 
+    printf("Enter Last Name: ");
+    scanf("%s", new_user.lastname);
+    if (strlen(new_user.lastname) == 0) {
+        printf("Last name cannot be empty.\n");
+        return;
+    }
+    if (isAlphaString(new_user.lastname) == 0) {
+        printf("Last name must contain only alphabetic characters.\n");
+        return;
+    }
+
+    printf("Enter Username: ");
+    scanf("%s", new_user.username);
+    if (strlen(new_user.username) == 0) {
+        printf("Username cannot be empty.\n");
+        return;
+    }
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, new_user.username) == 0) {
+            printf("Username already exists. Please choose another one.\n");
+            return;
+        }
+    }
+
+    printf("Enter Password: ");
+    scanf("%s", new_user.password);
+
+    printf("Enter Phone: ");
+    scanf("%s", new_user.phone);
+    if (!isValidPhoneNumber(new_user.phone)) {
+        printf("Phone number must contain only digits.\n");
+        return;
+    }
+
+    printf("Enter Email: ");
+    scanf("%s", new_user.email);
+    if (isValidEmail(new_user.email) == 0) {
+        printf("Invalid email format.\n");
+        return;
+    }
+
+    if (user_count < MAX_USERS) {
+        strcpy(users[user_count].firstname, new_user.firstname);
+        strcpy(users[user_count].lastname, new_user.lastname);
+        strcpy(users[user_count].username, new_user.username);
+        strcpy(users[user_count].password, new_user.password);
+        strcpy(users[user_count].phone, new_user.phone);
+        strcpy(users[user_count].email, new_user.email);
+        user_count++;
+        printf("User registered successfully.\n");
+        Save_User_info(new_user.username);
+    } else {
+        printf("Maximum user limit reached. Cannot register new user.\n");
+    }
+}
+
+void signIn() {
+    int i = 0;
+    struct User *login = NULL;
+    struct User users[MAX_USERS];
+    int user_count = 0;
+    char ch, username[MAX_SIZE], password[MAX_SIZE];
+    printf("Enter Username: ");
+    scanf("%s", username);
+    printf("Enter Password: ");
+    while ((ch = getchar()) != '\n' && ch != EOF);
+    i = 0;
+    while ((ch = getchar()) != '\n' && ch != EOF) {
+        password[i++] = ch;
+    }
+    password[i] = '\0';
+    for (i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, username) == 0 && strcmp(users[i].password, password) == 0) {
+            login = &users[i];
+            printf("Signed in successfully.\nWelcome, %s:)\n", login->firstname);
+            
+            Save_User_info(username); // Save login info immediately
+
+            return;
+        }
+    }
+    printf("Invalid username or password.\n");
+}
 
