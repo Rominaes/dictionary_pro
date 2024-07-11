@@ -15,11 +15,15 @@ struct User
     char phone[MAX_SIZE];
     char email[MAX_SIZE];
 };
+struct User *login = NULL;
+struct User users[MAX_USERS];
+int user_count = 0;
+
+
 
 int main()
 {
     int choice = 0;
-    struct User *login = NULL;
     while (choice != 4)
     {
         printf("\nMain Menu:\n");
@@ -106,12 +110,10 @@ void adminMenu()
     }
 }
 
-void userMenu()
-{
+void userMenu() {
     int choice;
     char s1[MAX_SIZE];
     char s2[MAX_SIZE];
-    struct User *login = NULL;
 
     while (choice != 6 && login != NULL)
     {
@@ -155,8 +157,6 @@ void userMenu()
 
 void signUp() {
     struct User new_user;
-    struct User users[MAX_USERS];
-    int user_count = 0;
     printf("Enter First Name: ");
     scanf("%s", new_user.firstname);
     if (strlen(new_user.firstname) == 0) {
@@ -226,10 +226,9 @@ void signUp() {
 
 void signIn() {
     int i = 0;
-    struct User *login = NULL;
-    struct User users[MAX_USERS];
-    int user_count = 0;
-    char ch, username[MAX_SIZE], password[MAX_SIZE];
+    char ch;
+    char username[MAX_SIZE];
+    char password[MAX_SIZE];
     printf("Enter Username: ");
     scanf("%s", username);
     printf("Enter Password: ");
@@ -244,7 +243,7 @@ void signIn() {
             login = &users[i];
             printf("Signed in successfully.\nWelcome, %s:)\n", login->firstname);
             
-            Save_User_info(username); // Save login info immediately
+            Save_User_info(username);
 
             return;
         }
