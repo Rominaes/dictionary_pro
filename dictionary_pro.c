@@ -251,3 +251,76 @@ void signIn() {
     printf("Invalid username or password.\n");
 }
 
+
+void forgotPassword() {
+    int i;
+    char username[MAX_SIZE], phone[MAX_SIZE];
+    printf("Enter Username: ");
+    scanf("%s", username);
+    printf("Enter Phone: ");
+    scanf("%s", phone);
+    for ( i = 0; i < user_count; i++) {
+        if (strcmp(users[i].username, username) == 0 && strcmp(users[i].phone, phone) == 0) {
+            printf("Enter New Password: ");
+            scanf("%s", users[i].password);
+            printf("Password updated successfully.\n");
+
+            Save_User_info(username);
+
+            return;
+        }
+    }
+    printf("Username and phone number do not match:( \n");
+}
+
+int isValidEmail(char email[]) {
+    int i , length, atIndex = -1;
+    length = strlen(email);
+
+    for ( i = 0; i < length; i++) {
+        if (email[i] == '@') {
+            atIndex = i;
+            break;
+        }
+    }
+
+    if (atIndex == -1 || atIndex > 32 || length - atIndex > 12
+    || strcmp(email + length - 10, "@gmail.com") != 0)
+    {return 0;}
+    else
+    {return 1;}
+}
+
+int isAlphaString(char *str) {
+    int i;
+    for ( i = 0; str[i] != '\0'; i++) {
+        if (!isalpha(str[i]))
+            {return 0;}
+    }
+    return 1;
+}
+
+int isValidPhoneNumber(char *phone) {
+    for (int i = 0; phone[i] != '\0'; i++) {
+        if (!isdigit(phone[i]))
+            {return 0;}
+    }
+    return 1;
+}
+
+void Save_User_info(const char *username) {
+    FILE *file;
+    file = fopen("user.txt", "a");
+    if (file == NULL) {
+        printf("File could not be opened for writing.\n");
+        return;
+    }
+
+    fprintf(file, "Username: %s\n", username);
+    fprintf(file, "--------------------------\n");
+
+    fclose(file);
+    printf("Login information saved successfully.\n");
+}
+
+
