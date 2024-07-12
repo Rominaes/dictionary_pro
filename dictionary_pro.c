@@ -5,6 +5,7 @@
 
 #define MAX_SIZE 100
 #define MAX_USERS 100
+#define MAX_MEANINGS 10
 
 struct User
 {
@@ -19,13 +20,41 @@ struct User *login = NULL;
 struct User users[MAX_USERS];
 int user_count = 0;
 
+struct DictionaryWord {
+    char word[MAX_SIZE];
+    char meanings[MAX_MEANINGS][MAX_SIZE];
+    int meaning_count;
+};
+
+struct DictionaryNode
+{
+    struct DictionaryWord data;
+    struct DictionaryNode *next;
+};
+struct DictionaryNode *dictionary_head = NULL;
+int word_count = 0;
+
+
+
+void adminMenu();
+void userMenu();
+void signUp();
+void signIn();
+void forgotPassword();
+int isValidEmail(char []);
+int isAlphaString(char *);
+int isValidPhoneNumber(char *);
+void Save_User_info(const char * , const char *);
+void ReadFromFile_Admin();
+void Save_words_in_file();
+
 
 
 int main() {
     int choice = 0;
     while (choice != 4)
     {
-        printf("\nMain Menu:\n");
+        printf("\nLogen Page:)):\n");
         printf("1. Sign Up\n");
         printf("2. Sign In\n");
         printf("3. Forgot Password\n");
@@ -89,7 +118,7 @@ void adminMenu() {
             //manageSuggestedWords();
             break;
         case 7:
-            printf("Returning to main menu...\n");
+            printf("Returning to Logen Page:))...\n");
             break;
         default:
             printf("Invalid choice. Please try again.\n");
@@ -241,22 +270,23 @@ void signIn() {
 
     char read_username[MAX_SIZE];
     char read_password[MAX_SIZE];
-    int found = 0;
+    int flg = 0;
     while (fscanf(file, "Username: %s\n", read_username) == 1) {
         fscanf(file, "Password: %s\n", read_password);
 
         if (strcmp(read_username, username) == 0 && strcmp(read_password, password) == 0) {
-            printf("\nSigned in successfully.\nWelcome, %s :)", read_username);
-            found = 1;
-            login = &users[i];
+            printf("\nSigned in successfully.\nWelcome %s :)\n", read_username);
+            flg = 1;
             break;
         }
     }
-    if (!found) {
+    if (!flg) {
         printf("\nInvalid username or password.\n");
     }
     fclose(file);
 
+    login = malloc(sizeof(struct User));
+    strcpy(login->username, read_username);
     if (login != NULL) {
         if (strcmp(login->username, "Admin") == 0) {
             adminMenu();
@@ -338,5 +368,77 @@ void Save_User_info(const char *username , const char *password) {
     printf("Login information saved successfully.\n");
 }
 
+
+void ReadFromFile_Admin() {
+    char *token;
+    char line[MAX_SIZE];
+    char fileName[MAX_SIZE];
+    printf("Enter File Name: ");
+    scanf("%s", fileName);
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL) {
+        printf("File not found or could not be opened.\n");
+        return;
+    }
+    while (fgets(line, MAX_SIZE, file) != NULL) {
+        struct DictionaryNode *new_node;
+        new_node = (struct DictionaryNode *)malloc(sizeof(struct DictionaryNode));
+        if (new_node == NULL) {
+            printf("Memory allocation failed. Cannot read from file.\n");
+            fclose(file);
+            return;
+        }
+        token = strtok(line, ",");
+        if (token == NULL) {
+            printf("Invalid format in file.\n");
+            free(new_node);
+            continue;
+        }
+        sscanf(token, "word: %s", new_node->data.word);
+        
+        token = strtok(NULL, ",");
+        if (token == NULL) {
+            printf("Invalid format in file.\n");
+            free(new_node);
+            continue;
+        }
+        sscanf(token, " translation: %[^\n]", new_node->data.meanings[0]);
+        
+        new_node->data.meaning_count = 1;
+
+        new_node->next = dictionary_head;
+        dictionary_head = new_node;
+        word_count++;
+    }
+    fclose(file);
+    printf("Dictionary loaded from file successfully.\n");
+}
+
+void Save_words_in_file() {
+    int count = 1;
+    struct DictionaryNode *ptr;
+    ptr = dictionary_head;
+
+    FILE * file;
+    file = fopen("dictionary.txt", "w");
+    if (file == NULL) {
+        printf("File could not be created or opened for writing.\n");
+        return;
+    }
+    while (ptr != NULL) {
+        fprintf(file, "%d- word: %s, translation: ", count, ptr->data.word);
+        for (int i = 0; i < ptr->data.meaning_count; i++) {
+            fprintf(file, "%s", ptr->data.meanings[i]);
+            if (i != ptr->data.meaning_count - 1)
+                fprintf(file, "-");
+        }
+        fprintf(file, "\n");
+        ptr = ptr->next;
+        count++;
+    }
+
+    fclose(file);
+    printf("Current state saved to file successfully.\n");
+}
 
 
