@@ -21,8 +21,7 @@ int user_count = 0;
 
 
 
-int main()
-{
+int main() {
     int choice = 0;
     while (choice != 4)
     {
@@ -40,17 +39,6 @@ int main()
             break;
         case 2:
             signIn();
-            if (login != NULL)
-            {
-                if (strcmp(login->username, "Admin") == 0)
-                {
-                    adminMenu();
-                }
-                else
-                {
-                    userMenu();
-                }
-            }
             break;
         case 3:
             forgotPassword();
@@ -66,8 +54,7 @@ int main()
     return 0;
 }
 
-void adminMenu()
-{
+void adminMenu() {
     int choice;
     while (choice != 7)
     {
@@ -99,7 +86,7 @@ void adminMenu()
             ShowAllWords_Admin();
             break;
         case 6:
-            // manageSuggestedWords();
+            //manageSuggestedWords();
             break;
         case 7:
             printf("Returning to main menu...\n");
@@ -125,7 +112,6 @@ void userMenu() {
         printf("5. Edit Information\n");
         printf("6. Log Out\n");
         printf("Choose an option: ");
-
         scanf("%d", &choice);
         switch (choice)
         {
@@ -218,7 +204,7 @@ void signUp() {
         strcpy(users[user_count].email, new_user.email);
         user_count++;
         printf("User registered successfully.\n");
-        Save_User_info(new_user.username);
+        Save_User_info(new_user.username , new_user.password);
     } else {
         printf("Maximum user limit reached. Cannot register new user.\n");
     }
@@ -229,43 +215,73 @@ void signIn() {
     char ch;
     char username[MAX_SIZE];
     char password[MAX_SIZE];
+    FILE *file;
+    file = fopen("user.txt", "r");
+    if (file == NULL) {
+        printf("Error opening user file.\n");
+        return;
+    }
     printf("Enter Username: ");
     scanf("%s", username);
-    printf("Enter Password: ");
-    while ((ch = getchar()) != '\n' && ch != EOF);
-    i = 0;
-    while ((ch = getchar()) != '\n' && ch != EOF) {
-        password[i++] = ch;
-    }
-    password[i] = '\0';
-    for (i = 0; i < user_count; i++) {
-        if (strcmp(users[i].username, username) == 0 && strcmp(users[i].password, password) == 0) {
-            login = &users[i];
-            printf("Signed in successfully.\nWelcome, %s:)\n", login->firstname);
-            
-            Save_User_info(username);
 
-            return;
+    printf("Enter Password: ");
+    while ((ch = getch()) != 13) {
+        if (ch == 8) {
+            if (i > 0) {
+                i--;
+                printf("\b \b");
+            }
+        } else {
+            password[i++] = ch;
+            printf("*");
         }
     }
-    printf("Invalid username or password.\n");
-}
+    password[i] = '\0';
+    printf("\n");
 
+    char read_username[MAX_SIZE];
+    char read_password[MAX_SIZE];
+    int found = 0;
+    while (fscanf(file, "Username: %s\n", read_username) == 1) {
+        fscanf(file, "Password: %s\n", read_password);
+
+        if (strcmp(read_username, username) == 0 && strcmp(read_password, password) == 0) {
+            printf("\nSigned in successfully.\nWelcome, %s :)", read_username);
+            found = 1;
+            login = &users[i];
+            break;
+        }
+    }
+    if (!found) {
+        printf("\nInvalid username or password.\n");
+    }
+    fclose(file);
+
+    if (login != NULL) {
+        if (strcmp(login->username, "Admin") == 0) {
+            adminMenu();
+        } else {
+            userMenu();
+        }
+    }
+}
 
 void forgotPassword() {
     int i;
-    char username[MAX_SIZE], phone[MAX_SIZE];
+    char username[MAX_SIZE];
+    char phone[MAX_SIZE];
+    char password[MAX_SIZE];
     printf("Enter Username: ");
     scanf("%s", username);
     printf("Enter Phone: ");
     scanf("%s", phone);
-    for ( i = 0; i < user_count; i++) {
+    for (i = 0; i < user_count; i++) {
         if (strcmp(users[i].username, username) == 0 && strcmp(users[i].phone, phone) == 0) {
             printf("Enter New Password: ");
             scanf("%s", users[i].password);
             printf("Password updated successfully.\n");
 
-            Save_User_info(username);
+            Save_User_info(username , password);
 
             return;
         }
@@ -308,7 +324,7 @@ int isValidPhoneNumber(char *phone) {
     return 1;
 }
 
-void Save_User_info(const char *username) {
+void Save_User_info(const char *username , const char *password) {
     FILE *file;
     file = fopen("user.txt", "a");
     if (file == NULL) {
@@ -317,10 +333,10 @@ void Save_User_info(const char *username) {
     }
 
     fprintf(file, "Username: %s\n", username);
-    fprintf(file, "--------------------------\n");
-
+    fprintf(file, "Password: %s\n", password);
     fclose(file);
     printf("Login information saved successfully.\n");
 }
+
 
 
